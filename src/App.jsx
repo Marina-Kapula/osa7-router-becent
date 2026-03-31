@@ -1,4 +1,5 @@
 import { useState } from 'react'
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,6 +8,7 @@ import {
   useParams,
   useNavigate,
 } from 'react-router-dom'
+import { useField } from './hooks/index.js'
 
 const Menu = () => {
   const padding = {
@@ -72,21 +74,23 @@ const Footer = () => (
 
 const CreateNew = ({ addNew }) => {
   const navigate = useNavigate()
+  const content = useField('text')
+  const author = useField('text')
+  const info = useField('text')
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    const content = event.target.content.value
-    const author = event.target.author.value
-    const info = event.target.info.value
 
     addNew({
-      content,
-      author,
-      info,
+      content: content.inputProps.value,
+      author: author.inputProps.value,
+      info: info.inputProps.value,
       votes: 0,
     })
 
-    event.target.reset()
+    content.reset()
+    author.reset()
+    info.reset()
     navigate('/')
   }
 
@@ -97,15 +101,15 @@ const CreateNew = ({ addNew }) => {
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input name="content" />
+          <input {...content.inputProps} />
         </div>
         <div>
           author
-          <input name="author" />
+          <input {...author.inputProps} />
         </div>
         <div>
           url for more info
-          <input name="info" />
+          <input {...info.inputProps} />
         </div>
         <button type="submit">create</button>
       </form>
@@ -134,9 +138,13 @@ const App = () => {
   const [notification, setNotification] = useState('')
 
   const addNew = (anecdote) => {
-    anecdote.id = (Math.random() * 10000).toFixed(0)
-    setAnecdotes(anecdotes.concat(anecdote))
-    setNotification(`a new anecdote '${anecdote.content}' created`)
+    const withId = {
+      ...anecdote,
+      id: (Math.random() * 10000).toFixed(0),
+    }
+
+    setAnecdotes(anecdotes.concat(withId))
+    setNotification(`a new anecdote '${withId.content}' created`)
     setTimeout(() => {
       setNotification('')
     }, 5000)
